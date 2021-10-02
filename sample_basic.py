@@ -6,7 +6,7 @@ import os
 
 from elliot.run import run_experiment
 
-url = "http://files.grouplens.org/datasets/movielens/ml-1m.zip"
+url = "/movielens/ml-1m.zip"
 print(f"Getting Movielens 1Million from : {url} ..")
 response = requests.get(url)
 

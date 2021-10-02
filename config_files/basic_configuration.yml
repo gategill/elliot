@@ -4,7 +4,7 @@ experiment:
   data_config:
     strategy: dataset
     dataloader: KnowledgeChainsLoader
-    dataset_path: ../data/{0}/dataset.tsv
+    dataset_path: ../data/{0}/dataset.ts
     side_information:
         map: ../data/cat_dbpedia_movielens_1m/map.tsv
         features: ../data/cat_dbpedia_movielens_1m/features.tsv

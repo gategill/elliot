@@ -17,6 +17,8 @@ import scipy.sparse as sp
 import typing as t
 import logging as pylog
 
+from icecream import ic
+
 from elliot.dataset.abstract_dataset import AbstractDataset
 from elliot.splitter.base_splitter import Splitter
 from elliot.prefiltering.standard_prefilters import PreFilter
@@ -91,6 +93,7 @@ class DataSetLoader(LoaderCoordinator):
         elif config.data_config.strategy == "dataset":
             self.logger.info("There will be the splitting")
             path_dataset = config.data_config.dataset_path
+            ic(path_dataset)
 
             self.dataframe = pd.read_csv(path_dataset, sep="\t", header=None, names=self.column_names)
             self.dataframe, self.side_information = self.coordinate_information(self.dataframe,
