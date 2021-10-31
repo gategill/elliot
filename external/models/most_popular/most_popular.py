@@ -2,6 +2,9 @@ import operator
 
 import numpy as np
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
 from elliot.evaluation.evaluator import Evaluator
 from elliot.recommender.base_recommender_model import BaseRecommenderModel
 from elliot.recommender.recommender_utils_mixin import RecMixin
@@ -15,6 +18,7 @@ np.random.seed(0)
 class MostPop(RecMixin, BaseRecommenderModel):
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
+        ic()
         """
         Create a Most Popular recommender.
         :param data: data loader object
@@ -32,6 +36,7 @@ class MostPop(RecMixin, BaseRecommenderModel):
         return "MostPop"
 
     def train(self):
+        ic()
         # recs = self.get_recommendations(self.evaluator.get_needed_recommendations())
         # result_dict = self.evaluator.eval(recs)
         # self._results.append(result_dict)
@@ -44,6 +49,7 @@ class MostPop(RecMixin, BaseRecommenderModel):
 
 
     def get_recommendations(self, top_k):
+        ic()
         predictions_top_k_val = {}
         predictions_top_k_test = {}
 
@@ -55,6 +61,7 @@ class MostPop(RecMixin, BaseRecommenderModel):
         return predictions_top_k_val, predictions_top_k_test
 
     def get_single_recommendation(self, mask, k):
+        ic()
         n_items = self._num_items
         sorted_pop_items = self._sorted_pop_items
         ratings = self._data.i_train_dict

@@ -11,6 +11,10 @@ import importlib
 import sys
 from os import path
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
+
 import numpy as np
 from hyperopt import Trials, fmin
 
@@ -37,6 +41,7 @@ print(f'Version Number: {__version__}')
 
 
 def run_experiment(config_path: str = ''):
+    ic()
     builder = NameSpaceBuilder(config_path, here, path.abspath(path.dirname(config_path)))
     base = builder.base
     config_test(builder, base)
@@ -56,13 +61,23 @@ def run_experiment(config_path: str = ''):
                                                                  0)
     res_handler = ResultHandler(rel_threshold=base.base_namespace.evaluation.relevance_threshold)
     hyper_handler = HyperParameterStudy(rel_threshold=base.base_namespace.evaluation.relevance_threshold)
+    
+    # data loading
     dataloader_class = getattr(importlib.import_module("elliot.dataset"), base.base_namespace.data_config.dataloader)
     dataloader = dataloader_class(config=base.base_namespace)
     data_test_list = dataloader.generate_dataobjects()
+    
+    # in model in models
     for key, model_base in builder.models():
+        ic(key, model_base)
+        
         test_results = []
         test_trials = []
+        
+        # for fold in folds
         for test_fold_index, data_test in enumerate(data_test_list):
+            ic(type(data_test))
+            
             logging_project.prepare_logger(key, base.base_namespace.path_log_folder)
             if key.startswith("external."):
                 spec = importlib.util.spec_from_file_location("external",
@@ -73,9 +88,11 @@ def run_experiment(config_path: str = ''):
                 model_class = getattr(importlib.import_module("external"), key.split(".", 1)[1])
             else:
                 model_class = getattr(importlib.import_module("elliot.recommender"), key)
-
+            ic(model_class)
+            
             model_placeholder = ho.ModelCoordinator(data_test, base.base_namespace, model_base, model_class,
                                                     test_fold_index)
+            # tune and train
             if isinstance(model_base, tuple):
                 logger.info(f"Tuning begun for {model_class.__name__}\\n")
                 trials = Trials()
@@ -99,6 +116,8 @@ def run_experiment(config_path: str = ''):
                 test_results.append(trials._trials[min_val]["result"])
                 test_trials.append(trials)
                 logger.info(f"Tuning ended for {model_class.__name__}")
+                
+            # just train
             else:
                 logger.info(f"Training begun for {model_class.__name__}\\n")
                 single = model_placeholder.single()
@@ -149,6 +168,7 @@ def run_experiment(config_path: str = ''):
 
 
 def _reset_verbose_option(model):
+    ic()
     if isinstance(model, tuple):
         model[0].meta.verbose = False
         model[0].meta.save_recs = False
@@ -161,6 +181,7 @@ def _reset_verbose_option(model):
 
 
 def config_test(builder, base):
+    ic()
     if base.base_namespace.config_test:
         logging_project.init(base.base_namespace.path_logger_config, base.base_namespace.path_log_folder)
         logger = logging_project.get_logger("__main__")

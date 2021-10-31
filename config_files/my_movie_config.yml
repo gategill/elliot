@@ -1,0 +1,43 @@
+experiment:
+  dataset: movielens_2k
+
+  data_config:
+    strategy: dataset
+    dataset_path: ../data/movielens_2k/dataset.tsv 
+
+  splitting:
+    test_splitting:
+        strategy: random_subsampling
+        test_ratio: 0.2
+        folds : 1
+
+  top_k: 50
+
+  evaluation:
+    cutoffs: [10] #, 9, 8, 7, 6, 5, 4, 3]
+    simple_metrics: [nDCG] # ,Precision,ItemCoverage,EPC,Gini]
+    #paired_ttest: True
+    #wilcoxon_test: True
+    relevance_threshold: 1
+
+  print_results_as_triplets: True
+
+  models:
+    #MostPop:
+    #  meta:
+    #    verbose: True
+    #    save_recs: True
+    #Random:
+    #  meta:
+    #    verbose: True
+    #    save_recs: True
+    #  seed: 42
+
+    UserKNN:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_metric: nDCG@10
+      neighbors: [50] #, 70, 100]
+      similarity: cosine
+      implementation: standard

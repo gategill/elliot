@@ -33,9 +33,13 @@ from . import metrics
 from . import popularity_utils
 from . import relevance
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
 
 class Evaluator(object):
     def __init__(self, data: ds.DataSet, params: SimpleNamespace):
+        ic()
         """
         Class to manage all the evaluation methods and operation
         :param data: dataset object
@@ -77,6 +81,8 @@ class Evaluator(object):
         self._needed_recommendations = self._compute_needed_recommendations()
 
     def eval(self, recommendations):
+        ic()
+
         """
         Runtime Evaluation of Accuracy Performance (top-k)
         :return:
@@ -92,6 +98,8 @@ class Evaluator(object):
         return result_dict
 
     def eval_at_k(self, recommendations, k):
+        ic()
+
         val_test = ["Validation", "Test"]
         result_list = []
         for p, (test_data, eval_objs) in enumerate(self._get_test_data()):
@@ -108,6 +116,7 @@ class Evaluator(object):
             return result_list[0][0], result_list[0][1], result_list[1][0], result_list[1][1]
 
     def _get_test_data(self):
+        ic()
         return [(self._val if hasattr(self, '_val') else None,
                  self._val_evaluation_objects if hasattr(self, '_val_evaluation_objects') else None),
                 (self._test if hasattr(self, '_test') else None,
@@ -115,6 +124,7 @@ class Evaluator(object):
                 ]
 
     def _process_test_data(self, recommendations, test_data, eval_objs, val_test):
+        ic()
         if (not test_data) or (not eval_objs):
             return None, None
         else:
@@ -147,6 +157,8 @@ class Evaluator(object):
             return results, statistical_results
 
     def _compute_needed_recommendations(self):
+        ic()
+        
         full_recommendations_metrics = any([m.needs_full_recommendations() for m in self._metrics])
         full_recommendations_additional_metrics = any([metrics.parse_metric(metric["metric"]).needs_full_recommendations() for metric in self._complex_metrics])
         if full_recommendations_metrics:
@@ -159,4 +171,6 @@ class Evaluator(object):
             return self._data.config.top_k
 
     def get_needed_recommendations(self):
+        ic()
+        
         return self._needed_recommendations

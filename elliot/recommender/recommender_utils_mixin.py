@@ -3,12 +3,16 @@ import os
 import numpy as np
 from tqdm import tqdm
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
+
 from elliot.utils.write import store_recommendation
 
 
 class RecMixin(object):
-
     def train(self):
+        ic()
         if self._restore:
             return self.restore_weights()
 
@@ -25,9 +29,17 @@ class RecMixin(object):
             self.evaluate(it, loss/(it + 1))
 
     def evaluate(self, it=None, loss=0):
+        r"""
+        what do I do?
+        get recommendations and evaluate!!!
+        """
+        
+        ic()
         if (it is None) or (not (it + 1) % self._validation_rate):
             recs = self.get_recommendations(self.evaluator.get_needed_recommendations())
             result_dict = self.evaluator.eval(recs)
+            
+            #ic(result_dict)
 
             self._losses.append(loss)
 
@@ -61,6 +73,7 @@ class RecMixin(object):
 
 
     def get_recommendations(self, k: int = 100):
+        ic()
         predictions_top_k_test = {}
         predictions_top_k_val = {}
         for index, offset in enumerate(range(0, self._num_users, self._batch_size)):
@@ -73,7 +86,7 @@ class RecMixin(object):
         return predictions_top_k_val, predictions_top_k_test
 
     def process_protocol(self, k, *args):
-
+        ic()
         if not self._negative_sampling:
             recs = self.get_single_recommendation(self.get_candidate_mask(), k, *args)
             return recs, recs
@@ -82,12 +95,14 @@ class RecMixin(object):
                    self.get_single_recommendation(self.get_candidate_mask(), k, *args)
 
     def get_single_recommendation(self, mask, k, predictions, offset, offset_stop):
+        ic()
         v, i = self._model.get_top_k(predictions, mask[offset: offset_stop], k=k)
         items_ratings_pair = [list(zip(map(self._data.private_items.get, u_list[0]), u_list[1]))
                               for u_list in list(zip(i.numpy(), v.numpy()))]
         return dict(zip(map(self._data.private_users.get, range(offset, offset_stop)), items_ratings_pair))
 
     def restore_weights(self):
+        ic()
         try:
             self._model.load_weights(self._saving_filepath)
             print(f"Model correctly Restored")
@@ -100,6 +115,7 @@ class RecMixin(object):
         return False
 
     def get_candidate_mask(self, validation=False):
+        ic()
         if self._negative_sampling:
             if validation:
                 return self._data.val_mask
@@ -109,18 +125,22 @@ class RecMixin(object):
             return self._data.allunrated_mask
 
     def get_loss(self):
+        ic()
         if self._optimize_internal_loss:
             return min(self._losses)
         else:
             return -max([r[self._validation_k]["val_results"][self._validation_metric] for r in self._results])
 
     def get_params(self):
+        ic()
         return self._params.__dict__
 
     def get_results(self):
+        ic()
         return self._results[self.get_best_arg()]
 
     def get_best_arg(self):
+        ic()
         if self._optimize_internal_loss:
             val_results = np.argmin(self._losses)
         else:
@@ -128,6 +148,7 @@ class RecMixin(object):
         return val_results
 
     def iterate(self, epochs):
+        ic()
         for iteration in range(epochs):
             if self._early_stopping.stop(self._losses[:], self._results):
                 self.logger.info(f"Met Early Stopping conditions: {self._early_stopping}")

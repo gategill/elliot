@@ -6,6 +6,10 @@ import inspect
 import logging as pylog
 import os
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
+
 import numpy as np
 import random
 
@@ -26,6 +30,7 @@ from elliot.recommender.early_stopping import EarlyStopping
 
 class BaseRecommenderModel(ABC):
     def __init__(self, data, config, params, *args, **kwargs):
+        ic()
         """
         This class represents a recommender model. You can load a pretrained model
         by specifying its checkpoint path and use it for training/testing purposes.
@@ -34,6 +39,10 @@ class BaseRecommenderModel(ABC):
             data: data loader object
             params: dictionary with all parameters
         """
+        
+        with open("data/movielens_2k/random_data.txt", "w") as f:
+            f.writelines(str(data))
+
         self._data = data
         self._config = config
         self._params = params
@@ -81,6 +90,7 @@ class BaseRecommenderModel(ABC):
         self._params_list = []
 
     def get_base_params_shortcut(self):
+        ic()
         return "_".join([str(k) + "=" + str(v).replace(".", "$") for k, v in
                          dict({"seed": self._seed,
                                "e": self._epochs,
@@ -88,9 +98,11 @@ class BaseRecommenderModel(ABC):
                          ])
 
     def get_params_shortcut(self):
+        ic()
         return "_".join([str(p[2])+"="+ str(p[5](getattr(self, p[0])) if p[5] else getattr(self, p[0])).replace(".", "$") for p in self._params_list])
 
     def autoset_params(self):
+        ic()
         """
         Define Parameters as tuples: (variable_name, public_name, shortcut, default, reading_function, printing_function)
         Example:
@@ -114,6 +126,7 @@ class BaseRecommenderModel(ABC):
 
     @staticmethod
     def _batch_remove(original_str: str, char_list):
+        ic()
         for c in char_list:
             original_str = original_str.replace(c, "")
         return original_str
@@ -140,8 +153,11 @@ class BaseRecommenderModel(ABC):
 
 
 def init_charger(init):
+    #ic()
     @wraps(init)
     def new_init(self, *args, **kwargs):
+        #ic()
+
         BaseRecommenderModel.__init__(self, *args, **kwargs)
         package_name = inspect.getmodule(self).__package__
         rec_name = f"external.{self.__class__.__name__}" if "external" in package_name else self.__class__.__name__

@@ -9,6 +9,11 @@ __email__ = 'vitowalter.anelli@poliba.it, claudio.pomo@poliba.it'
 
 import pickle
 import time
+import pandas as pd
+
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
 
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from elliot.utils.write import store_recommendation
@@ -44,6 +49,7 @@ class UserKNN(RecMixin, BaseRecommenderModel):
     """
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
+        ic()
 
         self._params_list = [
             ("_num_neighbors", "neighbors", "nn", 40, int, None),
@@ -77,9 +83,32 @@ class UserKNN(RecMixin, BaseRecommenderModel):
             self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
 
     def get_single_recommendation(self, mask, k, *args):
-        return {u: self._model.get_user_recs(u, mask, k) for u in self._ratings.keys()}
+        ic()
+        ic("calling get_user_recs() k times: ".format(k))
+        user_recs = {u: self._model.get_user_recs(u, mask, k) for u in self._ratings.keys()}
+        
+        with open("data/movielens_2k/get_user_recs.txt", "w") as f:
+            for u, recs in user_recs.items():
+                f.writelines(str(u) + " : " + str(recs) + "\n\n")
+                
+        
+        return user_recs
+    
+    def get_user_recs_df(self, recs):
+        ic()
+        from_records_list = []
+        for u, rec_list in recs.items():
+            for rec in rec_list:
+                from_records_list.append((u, rec[0], rec[1]))
+            #         NEW_REC = pd.DataFrame({"userId" : [75], "itemId" : [1], "rating": [5]}) # deleted ,
+
+        df = pd.DataFrame.from_records(from_records_list, columns = ["userId", "itemId", "rating"])
+        ic(df.head())
+        
 
     def get_recommendations(self, k: int = 10):
+        # why two?
+        ic()
         predictions_top_k_val = {}
         predictions_top_k_test = {}
 
@@ -87,6 +116,19 @@ class UserKNN(RecMixin, BaseRecommenderModel):
 
         predictions_top_k_val.update(recs_val)
         predictions_top_k_test.update(recs_test)
+        
+          
+        with open("data/movielens_2k/predictions_top_k_val.txt", "w") as f:
+            for u, recs in predictions_top_k_val.items():
+                f.writelines(str(u) + " : " + str(recs) + "\n\n")
+                
+        with open("data/movielens_2k/predictions_top_k_test.txt", "w") as f:
+            for u, recs in predictions_top_k_test.items():
+                f.writelines(str(u) + " : " + str(recs) + "\n\n")
+                
+        self.get_user_recs_df(predictions_top_k_val)
+        self.get_user_recs_df(predictions_top_k_test)
+
 
         return predictions_top_k_val, predictions_top_k_test
 
@@ -95,6 +137,7 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         return f"UserKNN_{self.get_params_shortcut()}"
 
     def train(self):
+        ic()
         if self._restore:
             return self.restore_weights()
 

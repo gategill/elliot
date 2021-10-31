@@ -12,6 +12,9 @@ import typing as t
 import numpy as np
 import logging as pylog
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
 from elliot.utils import logging
 
 from hyperopt import STATUS_OK
@@ -22,6 +25,7 @@ class ModelCoordinator(object):
     This class handles the selection of hyperparameters for the hyperparameter tuning realized with HyperOpt.
     """
 
+
     def __init__(self, data_objs, base: SimpleNamespace, params, model_class: t.ClassVar, test_fold_index: int):
         """
         The constructor creates a Placeholder of the recommender model.
@@ -30,8 +34,11 @@ class ModelCoordinator(object):
         :param params: a SimpleNamespace that contains the hyper-parameters of the model
         :param model_class: the class of the recommendation model
         """
+        ic()
         self.logger = logging.get_logger(self.__class__.__name__, pylog.CRITICAL if base.config_test else pylog.DEBUG)
-        self.data_objs = data_objs
+        # also update these
+        # data for THE model
+        self.data_objs = data_objs # is this the list
         self.base = base
         self.params = params
         self.model_class = model_class
@@ -39,6 +46,7 @@ class ModelCoordinator(object):
         self.model_config_index = 0
 
     def objective(self, args):
+        ic()
         """
         This function respect the signature, and the return format required for HyperOpt optimization
         :param args: a Dictionary that contains the new hyper-parameter values that will be used in the current run
@@ -55,10 +63,14 @@ class ModelCoordinator(object):
 
         losses = []
         results = []
+        
         for trainval_index, data_obj in enumerate(self.data_objs):
             self.logger.info(f"Exploration: Hyperparameter exploration number {self.model_config_index+1}")
             self.logger.info(f"Exploration: Test Fold exploration number {self.test_fold_index+1}")
             self.logger.info(f"Exploration: Train-Validation Fold exploration number {trainval_index+1}")
+            
+            
+            # data_obj = DataSet obj
             model = self.model_class(data=data_obj, config=self.base, params=model_params)
             model.train()
             losses.append(model.get_loss())
@@ -81,6 +93,7 @@ class ModelCoordinator(object):
         }
 
     def single(self):
+        ic()
         """
         This function respect the signature, and the return format required for HyperOpt optimization
         :param args: a Dictionary that contains the new hyper-parameter values that will be used in the current run
@@ -118,6 +131,7 @@ class ModelCoordinator(object):
 
     @staticmethod
     def _average_results(results_list):
+        ic()
         ks = list(results_list[0].keys())
         eval_result_types = ["val_results", "test_results"]
         metrics = list(results_list[0][ks[0]]["val_results"].keys())

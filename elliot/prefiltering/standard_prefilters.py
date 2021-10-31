@@ -28,76 +28,79 @@ class PreFilter:
     @staticmethod
     def single_filter(d: pd.DataFrame, ns: SimpleNamespace) -> pd.DataFrame:
 
-        strategy = getattr(ns, "strategy", None)
+        strategies = getattr(ns, "strategy", None)
         data = d.copy()
-        if strategy == "global_threshold":
-            threshold = getattr(ns, "threshold", None)
-            if threshold is not None:
-                if str(threshold).isdigit():
-                    data = PreFilter.filter_ratings_by_threshold(data, threshold)
-                elif threshold == "average":
-                    data = PreFilter.filter_ratings_by_global_average(data)
+        
+        for i, strategy in enumerate(strategies):
+            
+            if strategy == "global_threshold":
+                threshold = getattr(ns, "threshold", None)
+                if threshold is not None:
+                    if str(threshold).isdigit():
+                        data = PreFilter.filter_ratings_by_threshold(data, threshold)
+                    elif threshold == "average":
+                        data = PreFilter.filter_ratings_by_global_average(data)
+                    else:
+                        raise Exception("Threshold value not recognized")
                 else:
-                    raise Exception("Threshold value not recognized")
-            else:
-                raise Exception("Threshold option is missing")
+                    raise Exception("Threshold option is missing")
 
-        elif strategy == "user_average":
-            data = PreFilter.filter_ratings_by_user_average(data)
+            elif strategy == "user_average":
+                data = PreFilter.filter_ratings_by_user_average(data)
 
-        elif strategy == "user_k_core":
-            core = getattr(ns, "core", None)
-            if core is not None:
-                if str(core).isdigit():
-                    data = PreFilter.filter_users_by_profile_size(data, core)
+            elif strategy == "user_k_core":
+                core = getattr(ns, "core", None)
+                if core is not None:
+                    if str(core)[i].isdigit():
+                        data = PreFilter.filter_users_by_profile_size(data, core[i])
+                    else:
+                        raise Exception("Core option is not a digit")
                 else:
-                    raise Exception("Core option is not a digit")
-            else:
-                raise Exception("Core option is missing")
+                    raise Exception("Core option is missing")
 
-        elif strategy == "item_k_core":
-            core = getattr(ns, "core", None)
-            if core is not None:
-                if str(core).isdigit():
-                    data = PreFilter.filter_items_by_popularity(data, core)
+            elif strategy == "item_k_core":
+                core = getattr(ns, "core", None)
+                if core is not None:
+                    if str(core[i]).isdigit():
+                        data = PreFilter.filter_items_by_popularity(data, core[i])
+                    else:
+                        raise Exception("Core option is not a digit")
                 else:
-                    raise Exception("Core option is not a digit")
-            else:
-                raise Exception("Core option is missing")
+                    raise Exception("Core option is missing")
 
-        elif strategy == "iterative_k_core":
-            core = getattr(ns, "core", None)
-            if core is not None:
-                if str(core).isdigit():
-                    data = PreFilter.filter_iterative_k_core(data, core)
+            elif strategy == "iterative_k_core":
+                core = getattr(ns, "core", None)
+                if core is not None:
+                    if str(core[i]).isdigit():
+                        data = PreFilter.filter_iterative_k_core(data, core[i])
+                    else:
+                        raise Exception("Core option is not a digit")
                 else:
-                    raise Exception("Core option is not a digit")
-            else:
-                raise Exception("Core option is missing")
+                    raise Exception("Core option is missing")
 
-        elif strategy == "n_rounds_k_core":
-            core = getattr(ns, "core", None)
-            n_rounds = getattr(ns, "rounds", None)
-            if (core is not None) and (n_rounds is not None):
-                if str(core).isdigit() and str(n_rounds).isdigit():
-                    data = PreFilter.filter_rounds_k_core(data, core, n_rounds)
+            elif strategy == "n_rounds_k_core":
+                core = getattr(ns, "core", None)
+                n_rounds = getattr(ns, "rounds", None)
+                if (core is not None) and (n_rounds is not None):
+                    if str(core).isdigit() and str(n_rounds).isdigit():
+                        data = PreFilter.filter_rounds_k_core(data, core, n_rounds)
+                    else:
+                        raise Exception("Core or rounds options are not digits")
                 else:
-                    raise Exception("Core or rounds options are not digits")
-            else:
-                raise Exception("Core or rounds options are missing")
+                    raise Exception("Core or rounds options are missing")
 
-        elif strategy == "cold_users":
-            threshold = getattr(ns, "threshold", None)
-            if threshold is not None:
-                if str(threshold).isdigit():
-                    data = PreFilter.filter_retain_cold_users(data, threshold)
+            elif strategy == "cold_users":
+                threshold = getattr(ns, "threshold", None)
+                if threshold is not None:
+                    if str(threshold).isdigit():
+                        data = PreFilter.filter_retain_cold_users(data, threshold)
+                    else:
+                        raise Exception("Threshold option is not a digit")
                 else:
-                    raise Exception("Threshold option is not a digit")
-            else:
-                raise Exception("Threshold option is missing")
+                    raise Exception("Threshold option is missing")
 
-        else:
-            raise Exception("Misssing strategy")
+            else:
+                raise Exception("Misssing strategy")
 
         return data
 

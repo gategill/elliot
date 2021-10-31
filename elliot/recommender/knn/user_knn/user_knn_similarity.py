@@ -1,5 +1,8 @@
 import pickle
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
 import numpy as np
 from scipy import sparse
 from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances, haversine_distances, chi2_kernel, manhattan_distances
@@ -12,6 +15,7 @@ class Similarity(object):
     """
 
     def __init__(self, data, num_neighbors, similarity, implicit):
+        ic()
         self._data = data
         self._ratings = data.train_dict
         self._num_neighbors = num_neighbors
@@ -22,7 +26,8 @@ class Similarity(object):
             self._URM = self._data.sp_i_train
         else:
             self._URM = self._data.sp_i_train_ratings
-
+        
+        # is this our local deep copy?
         self._users = self._data.users
         self._items = self._data.items
         self._private_users = self._data.private_users
@@ -31,6 +36,7 @@ class Similarity(object):
         self._public_items = self._data.public_items
 
     def initialize(self):
+        ic()
         """
         This function initialize the data model
         """
@@ -92,6 +98,8 @@ class Similarity(object):
     #     return self._neighbors.get(item, {})
 
     def process_similarity(self, similarity):
+        ic()
+        
         if similarity == "cosine":
             self._similarity_matrix = cosine_similarity(self._URM)
         elif similarity == "dot":
@@ -135,6 +143,8 @@ class Similarity(object):
     #     return self._transactions
 
     def get_user_recs(self, u, mask, k):
+        #ic()
+        
         user_id = self._data.public_users.get(u)
         user_recs = self._preds[user_id]
         # user_items = self._ratings[u].keys()
@@ -152,7 +162,9 @@ class Similarity(object):
         real_indices = indices[partially_ordered_preds_indices]
         local_top_k = real_values.argsort()[::-1]
         return [(real_indices[item], real_values[item]) for item in local_top_k]
+    
 
+        
     # def get_user_recs(self, u, mask, k):
     #     user_items = self._ratings[u].keys()
     #     user_mask = mask[self._data.public_users[u]]
@@ -178,7 +190,9 @@ class Similarity(object):
     #     num = sum([v for k, v in neighs.items() if k in user_neighs_items])
     #     den = sum(np.power(list(neighs.values()), 1))
     #     return num/den if den != 0 else 0
+    
     def get_model_state(self):
+        ic()
         saving_dict = {}
         saving_dict['_preds'] = self._preds
         saving_dict['_similarity'] = self._similarity
@@ -187,15 +201,18 @@ class Similarity(object):
         return saving_dict
 
     def set_model_state(self, saving_dict):
+        ic()
         self._preds = saving_dict['_preds']
         self._similarity = saving_dict['_similarity']
         self._num_neighbors = saving_dict['_num_neighbors']
         self._implicit = saving_dict['_implicit']
 
     def load_weights(self, path):
+        ic()
         with open(path, "rb") as f:
             self.set_model_state(pickle.load(f))
 
     def save_weights(self, path):
+        ic()
         with open(path, "wb") as f:
             pickle.dump(self.get_model_state(), f)
