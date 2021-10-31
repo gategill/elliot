@@ -72,6 +72,9 @@ class ModelCoordinator(object):
             
             # data_obj = DataSet obj
             ic(data_obj.transactions)
+            ic(self.base)
+            ic(model_params)
+            
             model = self.model_class(data=data_obj, config=self.base, params=model_params)
             model.train()
             losses.append(model.get_loss())
