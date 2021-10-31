@@ -21,19 +21,15 @@ experiment:
     relevance_threshold: 1
 
   print_results_as_triplets: True
-
+  external_models_path: ../external/models/__init__.py
   models:
     #MostPop:
     #  meta:
     #    verbose: True
     #    save_recs: True
-    #Random:
-    #  meta:
-    #    verbose: True
-    #    save_recs: True
-    #  seed: 42
 
-    UserKNN:
+
+    external.RecUserKNN:
       meta:
         verbose: True
         save_recs: True
@@ -41,3 +37,9 @@ experiment:
       neighbors: [50] #, 70, 100]
       similarity: cosine
       implementation: standard
+
+    #Random:
+    #  meta:
+    #    verbose: True
+    #    save_recs: True
+    #  seed: 42

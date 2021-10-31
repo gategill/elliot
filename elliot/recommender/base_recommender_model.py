@@ -12,6 +12,7 @@ ic.configureOutput(includeContext=True)
 
 import numpy as np
 import random
+import copy
 
 from elliot.evaluation.evaluator import Evaluator
 from elliot.utils.folder import build_model_folder
@@ -42,8 +43,12 @@ class BaseRecommenderModel(ABC):
         
         with open("data/movielens_2k/random_data.txt", "w") as f:
             f.writelines(str(data))
+            
+        # here we copy data, but is it seperate?
 
-        self._data = data
+        #self._data = data
+        self._data = copy.deepcopy(data)
+
         self._config = config
         self._params = params
 

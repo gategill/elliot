@@ -20,6 +20,8 @@ class Random(RecMixin, BaseRecommenderModel):
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
         ic()
+        ic(self._data.transactions)
+
         """
         Create a Random recommender.
         :param data: data loader object

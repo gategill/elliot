@@ -13,7 +13,7 @@ import pandas as pd
 
 from icecream import ic
 ic.configureOutput(includeContext=True)
-
+import copy
 
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from elliot.utils.write import store_recommendation
@@ -49,6 +49,17 @@ class UserKNN(RecMixin, BaseRecommenderModel):
     """
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
+        # copy it self._data = data
+        ic("DOING WEIRD COPY STUFF")
+        ic(self._data.transactions)
+        
+        #self._data = copy.deepcopy(data)
+        #ic(self._data.transactions)
+
+
+        #self._data.add_new_recs_to_train_set()
+        ic(self._data.transactions)
+
         ic()
 
         self._params_list = [
@@ -82,6 +93,7 @@ class UserKNN(RecMixin, BaseRecommenderModel):
                 print("Options normalize, asymmetric_alpha, tversky_alpha, tversky_beta, row_weights are ignored with standard implementation. Try with implementation: aiolli")
             self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
 
+        ic(self._data.train_dict[75])
     def get_single_recommendation(self, mask, k, *args):
         ic()
         ic("calling get_user_recs() k times: ".format(k))
@@ -96,17 +108,21 @@ class UserKNN(RecMixin, BaseRecommenderModel):
     
     def get_user_recs_df(self, recs):
         ic()
-        from_records_list = []
-        for u, rec_list in recs.items():
-            for rec in rec_list:
-                from_records_list.append((u, rec[0], rec[1]))
+        #from_records_list = []
+        from_records_list = [(u, rec[0], rec[1]) for u, rec_list in recs.items() for rec in rec_list]
+
+        #for u, rec_list in recs.items():
+        #    for rec in rec_list:
+        #        from_records_list.append((u, rec[0], rec[1]))
             #         NEW_REC = pd.DataFrame({"userId" : [75], "itemId" : [1], "rating": [5]}) # deleted ,
 
         df = pd.DataFrame.from_records(from_records_list, columns = ["userId", "itemId", "rating"])
         ic(df.head())
         
+        return df
+        
 
-    def get_recommendations(self, k: int = 10):
+    def get_recommendations(self, k: int = 10, df = False):
         # why two?
         ic()
         predictions_top_k_val = {}
@@ -126,11 +142,13 @@ class UserKNN(RecMixin, BaseRecommenderModel):
             for u, recs in predictions_top_k_test.items():
                 f.writelines(str(u) + " : " + str(recs) + "\n\n")
                 
-        self.get_user_recs_df(predictions_top_k_val)
-        self.get_user_recs_df(predictions_top_k_test)
-
-
-        return predictions_top_k_val, predictions_top_k_test
+        ic(predictions_top_k_val == predictions_top_k_test)
+                
+        if df:
+            return self.get_user_recs_df(predictions_top_k_val)
+            #self.get_user_recs_df(predictions_top_k_test)
+        else:
+            return predictions_top_k_val, predictions_top_k_test
 
     @property
     def name(self):

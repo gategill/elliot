@@ -30,23 +30,3 @@ for i in range(0,len( li1)):
     print (li1[i],end=" ")
     
     
-class Cat:
-    def __init__(self, name):
-        self.name = name
-        print("The cat's name is: " + self.name)
-        
-    def change_name(self, new_name):
-        self.name = new_name
-        print("The cat's new name is: " + self.name)
-
-        
-    
-class Dog:
-    def __init__(self, name):
-        self.name = name
-        print("The dogs name is: " + self.name)
-        
-a_name = "Kristina"
-a_cat = Cat(a_name)
-a_cat.change_name("Elricht")
-print("The var a_name is: " + a_name)

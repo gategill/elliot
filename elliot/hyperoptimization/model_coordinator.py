@@ -71,6 +71,7 @@ class ModelCoordinator(object):
             
             
             # data_obj = DataSet obj
+            ic(data_obj.transactions)
             model = self.model_class(data=data_obj, config=self.base, params=model_params)
             model.train()
             losses.append(model.get_loss())
@@ -110,6 +111,8 @@ class ModelCoordinator(object):
         for trainval_index, data_obj in enumerate(self.data_objs):
             self.logger.info(f"Exploration: Test Fold exploration number {self.test_fold_index+1}")
             self.logger.info(f"Exploration: Train-Validation Fold exploration number {trainval_index+1}")
+            ic(data_obj.transactions)
+
             model = self.model_class(data=data_obj, config=self.base, params=self.params)
             model.train()
             losses.append(model.get_loss())

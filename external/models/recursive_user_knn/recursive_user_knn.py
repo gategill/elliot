@@ -10,19 +10,24 @@ __email__ = '118304271@umail.ucc.ie'
 import pickle
 import time
 
-#from elliot.recommender.recommender_utils_mixin import RecMixin
-#from elliot.utils.write import store_recommendation
-#from elliot.utils.folder import build_model_folder
+from elliot.recommender.recommender_utils_mixin import RecMixin
+from elliot.utils.write import store_recommendation
+from elliot.utils.folder import build_model_folder
 
-#from elliot.recommender.base_recommender_model import BaseRecommenderModel
-#from .recursive_user_knn.recursive_user_knn_similarity import Similarity
-#from elliot.recommender.base_recommender_model import init_charger
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
+
+from elliot.recommender.base_recommender_model import BaseRecommenderModel
+from elliot.recommender.knn.user_knn.user_knn_similarity import Similarity
+from elliot.recommender.base_recommender_model import init_charger
 
 from elliot.recommender.knn.user_knn import UserKNN
 
 
 
-class RecursiveUserKNN():
+#class RecursiveUserKNN(UserKNN):
+class RecUserKNN(BaseRecommenderModel, RecMixin):
     r"""
     Args:
         neighbors: Number of item neighbors
@@ -43,9 +48,10 @@ class RecursiveUserKNN():
     """
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
+        ic()
 
         self._params_list = [
-            # variable name, parameter name, shortcut, default, type, ? 
+            # variable name, public name, shortcut, default, type, ? 
             ("_num_neighbors", "neighbors", "nn", 40, int, None),
             ("_similarity", "similarity", "sim", "cosine", None, None),
             ("_implementation", "implementation", "imp", "standard", None, None),
@@ -63,16 +69,20 @@ class RecursiveUserKNN():
         if self._implementation != "standard":
             print("Options normalize, asymmetric_alpha, tversky_alpha, tversky_beta, row_weights are ignored with standard implementation. Try with implementation: standard")
 
-        self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
+        #self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
 
 
 
     def get_single_recommendation(self, mask, k, *args):
+        ic()
+
         return {u: self._model.get_user_recs(u, mask, k) for u in self._ratings.keys()}
 
 
 
     def get_recommendations(self, k: int = 10):
+        ic()
+
         #WHY TWO???
         predictions_top_k_val = {}
         predictions_top_k_test = {}
@@ -81,17 +91,38 @@ class RecursiveUserKNN():
 
         predictions_top_k_val.update(recs_val)
         predictions_top_k_test.update(recs_test)
+        
+        with open("data/movielens_2k/predictions_top_k_val_RECURSIVE.txt", "w") as f:
+            for u, recs in predictions_top_k_val.items():
+                f.writelines(str(u) + " : " + str(recs) + "\n\n")
 
         return predictions_top_k_val, predictions_top_k_test
 
     @property
     def name(self):
+        ic()
+
         return f"RecUserKNN_{self.get_params_shortcut()}"
 
     def train(self):
-        if self._restore:
-            return self.restore_weights()
+        ic()
 
+        #if self._restore:
+        #    return self.restore_weights()
+        
+        # enrichment phase
+        ENRICHMENTS = 5
+        for i in range(ENRICHMENTS):
+            ic(self._data.transactions)
+            #model_instance = UserKNN(data = self._data, config = self._config, params=self._params)
+            model_instance = UserKNN(data = self._data, config = self._config, params=self._params)
+            #model = self.model_class(data=data_obj, config=self.base, params=model_params)
+            model_instance._model.initialize()
+            new_recs_df = model_instance.get_recommendations(df = True)
+            self._data.add_new_recs_to_train_set(new_recs_df)
+            
+        
+        self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
         start = time.time()
         self._model.initialize()
         end = time.time()

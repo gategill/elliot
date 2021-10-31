@@ -25,5 +25,3 @@ from elliot.run import run_experiment
 #
 print("Done! We are now starting the Elliot's experiment")
 run_experiment("config_files/my_movie_config.yml")
-
-

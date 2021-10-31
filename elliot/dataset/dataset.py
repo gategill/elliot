@@ -226,6 +226,8 @@ class DataSet(AbstractDataset):
         self.num_items = len(self.items)
         self.transactions = sum(len(v) for v in self.train_dict.values())
         
+        ic(self.transactions)
+        
     
 
         sparsity = 1 - (self.transactions / (self.num_users * self.num_items))
@@ -296,10 +298,12 @@ class DataSet(AbstractDataset):
             
         #self.add_new_recs_to_train_set()
 
-    def add_new_recs_to_train_set(self, new_recs = None):
+    def add_new_recs_to_train_set(self, new_recs_df = None):
         ic()
-        NEW_REC = pd.DataFrame({"userId" : [75], "itemId" : [1], "rating": [5]}) # deleted ,
-        new_train_df = self._data_tuple[0].append(NEW_REC, ignore_index = True)
+        if new_recs_df is None:
+            new_recs_df = pd.DataFrame({"userId" : [75], "itemId" : [1], "rating": [5]})
+            
+        new_train_df = self._data_tuple[0].append(new_recs_df, ignore_index = True)
         
         self._data_tuple = (new_train_df, self._data_tuple[1])
         
@@ -343,6 +347,11 @@ class DataSet(AbstractDataset):
         self.sp_i_train = self.build_sparse()
         self.sp_i_train_ratings = self.build_sparse_ratings()
         
+        self.allunrated_mask = np.where((self.sp_i_train.toarray() == 0), True, False)
+        ic(self.transactions)
+
+
+        
         with open("data/movielens_2k/data_tuple_0_updated.txt", "w") as f:
             #for u, recs in user_recs.items():
             f.write(str(self._data_tuple[0]) + "\n\n") # differs
@@ -365,9 +374,6 @@ class DataSet(AbstractDataset):
             f.write(str(self.i_train_dict) + "\n\n") # differs
             f.write(str(self.sp_i_train) + "\n\n") # differs
             f.write(str(self.sp_i_train_ratings) + "\n\n") # differs
-            
-
-        
         
     def dataframe_to_dict(self, data):
         ic()
