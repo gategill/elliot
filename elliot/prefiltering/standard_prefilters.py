@@ -2,6 +2,12 @@
 import pandas as pd
 from types import SimpleNamespace
 
+
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
+
+
 """
 prefiltering:
     strategy: global_threshold|user_average|user_k_core|item_k_core|iterative_k_core|n_rounds_k_core|cold_users
@@ -15,8 +21,11 @@ class PreFilter:
 
     @staticmethod
     def filter(d: pd.DataFrame, ns: SimpleNamespace) -> pd.DataFrame:
+        ic()
         if not hasattr(ns, "prefiltering"):
             return d
+        
+
         ns = ns.prefiltering
         dataframe = d.copy()
 
@@ -26,14 +35,19 @@ class PreFilter:
         return dataframe
 
     @staticmethod
+    
     def single_filter(d: pd.DataFrame, ns: SimpleNamespace) -> pd.DataFrame:
+        ic()
 
         strategies = getattr(ns, "strategy", None)
+        strategies = strategies if isinstance(strategies, list) else [strategies]
+
         data = d.copy()
         
         for i, strategy in enumerate(strategies):
             
             if strategy == "global_threshold":
+                ic(strategy)
                 threshold = getattr(ns, "threshold", None)
                 if threshold is not None:
                     if str(threshold).isdigit():
@@ -46,12 +60,16 @@ class PreFilter:
                     raise Exception("Threshold option is missing")
 
             elif strategy == "user_average":
+                ic(strategy)
                 data = PreFilter.filter_ratings_by_user_average(data)
 
             elif strategy == "user_k_core":
+                ic(strategy)
                 core = getattr(ns, "core", None)
+
                 if core is not None:
-                    if str(core)[i].isdigit():
+                    core = core if isinstance(core, list) else [core]
+                    if str(core[i]).isdigit():
                         data = PreFilter.filter_users_by_profile_size(data, core[i])
                     else:
                         raise Exception("Core option is not a digit")
@@ -59,8 +77,11 @@ class PreFilter:
                     raise Exception("Core option is missing")
 
             elif strategy == "item_k_core":
+                ic(strategy)
                 core = getattr(ns, "core", None)
+                
                 if core is not None:
+                    core = core if isinstance(core, list) else [core]
                     if str(core[i]).isdigit():
                         data = PreFilter.filter_items_by_popularity(data, core[i])
                     else:
@@ -69,8 +90,10 @@ class PreFilter:
                     raise Exception("Core option is missing")
 
             elif strategy == "iterative_k_core":
+                ic(strategy)
                 core = getattr(ns, "core", None)
                 if core is not None:
+                    core = core if isinstance(core, list) else [core]
                     if str(core[i]).isdigit():
                         data = PreFilter.filter_iterative_k_core(data, core[i])
                     else:
@@ -79,10 +102,12 @@ class PreFilter:
                     raise Exception("Core option is missing")
 
             elif strategy == "n_rounds_k_core":
+                ic(strategy)
                 core = getattr(ns, "core", None)
                 n_rounds = getattr(ns, "rounds", None)
                 if (core is not None) and (n_rounds is not None):
                     if str(core).isdigit() and str(n_rounds).isdigit():
+        
                         data = PreFilter.filter_rounds_k_core(data, core, n_rounds)
                     else:
                         raise Exception("Core or rounds options are not digits")
@@ -90,6 +115,7 @@ class PreFilter:
                     raise Exception("Core or rounds options are missing")
 
             elif strategy == "cold_users":
+                ic(strategy)
                 threshold = getattr(ns, "threshold", None)
                 if threshold is not None:
                     if str(threshold).isdigit():
@@ -106,6 +132,7 @@ class PreFilter:
 
     @staticmethod
     def filter_ratings_by_global_average(d: pd.DataFrame) -> pd.DataFrame:
+        ic()
         data = d.copy()
         threshold = data["rating"].mean()
         print("\nPrefiltering with Global Average")
@@ -116,6 +143,7 @@ class PreFilter:
 
     @staticmethod
     def filter_ratings_by_threshold(d: pd.DataFrame, threshold) -> pd.DataFrame:
+        ic()
         data = d.copy()
         print("\nPrefiltering with fixed threshold")
         print(f"The rating threshold is {round(threshold, 1)}")
@@ -125,6 +153,7 @@ class PreFilter:
 
     @staticmethod
     def filter_ratings_by_user_average(d: pd.DataFrame) -> pd.DataFrame:
+        ic()
         data = d.copy()
         user_groups = data.groupby(['userId'])
         for name, group in user_groups:
@@ -138,6 +167,7 @@ class PreFilter:
 
     @staticmethod
     def filter_users_by_profile_size(d: pd.DataFrame, threshold) -> pd.DataFrame:
+        ic()
         data = d.copy()
         print(f"\nPrefiltering with user {threshold}-core")
         print(f"The transactions before filtering are {len(data)}")
@@ -150,6 +180,7 @@ class PreFilter:
 
     @staticmethod
     def filter_items_by_popularity(d: pd.DataFrame, threshold) -> pd.DataFrame:
+        ic()
         data = d.copy()
         print(f"\nPrefiltering with item {threshold}-core")
         print(f"The transactions before filtering are {len(data)}")
@@ -162,6 +193,7 @@ class PreFilter:
 
     @staticmethod
     def filter_iterative_k_core(d: pd.DataFrame, threshold) -> pd.DataFrame:
+        ic()
         data = d.copy()
         check_var = True
         original_length = len(data)
@@ -181,6 +213,7 @@ class PreFilter:
 
     @staticmethod
     def filter_rounds_k_core(d: pd.DataFrame, threshold, n_rounds) -> pd.DataFrame:
+        ic()
         data = d.copy()
         print("\n**************************************")
         print(f"{n_rounds} rounds of user/item {threshold}-core")
@@ -194,6 +227,7 @@ class PreFilter:
 
     @staticmethod
     def filter_retain_cold_users(d: pd.DataFrame, threshold) -> pd.DataFrame:
+        ic()
         data = d.copy()
         print(f"\nPrefiltering retaining cold users with {threshold} or less ratings")
         print(f"The transactions before filtering are {len(data)}")

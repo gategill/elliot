@@ -12,7 +12,12 @@ import time, sys
 import scipy.sparse as sp
 
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
+
 def check_matrix(X, format='csc', dtype=np.float32):
+    ic()
     """
     This function takes a matrix as input and transforms it into the specified format.
     The matrix in input can be either sparse or ndarray.
@@ -68,6 +73,7 @@ class AiolliSimilarity(object):
         similarity : str, way to calculate similarity
         normalize : bool, whether calculate similarity with normalized value
         """
+        ic()
         self._data = data
         self._implicit = implicit
 
@@ -99,6 +105,7 @@ class AiolliSimilarity(object):
         # self.yr = None
 
     def initialize(self):
+        ic()
         # self.yr = defaultdict(list)
         # for _, row in self._train_set.iterrows():
         #     self.yr[int(row['user'])].append((int(row['item']), row['rating']))
@@ -123,12 +130,15 @@ class AiolliSimilarity(object):
                                         row_weights=self.row_weights)
 
         w_sparse = similarity.compute_similarity()
+        
+        ic(w_sparse.toarray()[0])
         w_sparse = w_sparse.tocsc()
 
         # self.pred_mat = w_sparse.dot(train).tolil()
         self.pred_mat = w_sparse.dot(train).toarray()
 
     def get_user_recs(self, u, mask, k):
+        #ic()
         user_id = self._data.public_users.get(u)
         user_recs = self.pred_mat[user_id]
         # user_items = self._ratings[u].keys()
@@ -169,6 +179,7 @@ class AiolliSimilarity(object):
     #     return self.pred_mat[indexed_user, indexed_item]
 
     def _convert_df(self, user_num, item_num, df):
+        ic()
         """Process Data to make ItemKNN available"""
         ratings = list(df['rating'])
         rows = list(df['user'])
@@ -179,6 +190,7 @@ class AiolliSimilarity(object):
         return mat
 
     def get_model_state(self):
+        ic()
         saving_dict = {}
         saving_dict['_preds'] = self._preds
         saving_dict['_similarity'] = self._similarity
@@ -187,16 +199,19 @@ class AiolliSimilarity(object):
         return saving_dict
 
     def set_model_state(self, saving_dict):
+        ic()
         self._preds = saving_dict['_preds']
         self._similarity = saving_dict['_similarity']
         self._num_neighbors = saving_dict['_num_neighbors']
         self._implicit = saving_dict['_implicit']
 
     def load_weights(self, path):
+        ic()
         with open(path, "rb") as f:
             self.set_model_state(pickle.load(f))
 
     def save_weights(self, path):
+        ic()
         with open(path, "wb") as f:
             pickle.dump(self.get_model_state(), f)
 
@@ -232,7 +247,7 @@ class Compute_Similarity:
         """
 
         # super(Compute_Similarity_Python, self).__init__()
-
+        ic()
         self.shrink = shrink
         self.normalize = normalize
 
@@ -295,6 +310,7 @@ class Compute_Similarity:
             self.dataMatrix_weighted = self.dataMatrix.T.dot(self.row_weights_diag).T
 
     def applyAdjustedCosine(self):
+        ic()
         """
         Remove from every data point the average for the corresponding row
         :return:
@@ -325,6 +341,7 @@ class Compute_Similarity:
             start_row += blockSize
 
     def applyPearsonCorrelation(self):
+        ic()
         """
         Remove from every data point the average for the corresponding column
         :return:
@@ -349,12 +366,12 @@ class Compute_Similarity:
         while end_col < self.n_columns:
             end_col = min(self.n_columns, end_col + blockSize)
 
-            self.dataMatrix.data[self.dataMatrix.indptr[start_col]:self.dataMatrix.indptr[end_col]] -= \
-                np.repeat(colAverage[start_col:end_col], interactionsPerCol[start_col:end_col])
+            self.dataMatrix.data[self.dataMatrix.indptr[start_col]:self.dataMatrix.indptr[end_col]] -= np.repeat(colAverage[start_col:end_col], interactionsPerCol[start_col:end_col])
 
             start_col += blockSize
 
     def useOnlyBooleanInteractions(self):
+        ic()
 
         # Split in blocks to avoid duplicating the whole data structure
         start_pos = 0
@@ -370,6 +387,7 @@ class Compute_Similarity:
             start_pos += blockSize
 
     def compute_similarity(self, start_col=None, end_col=None, block_size=100):
+        ic()
         """
         Compute the similarity for the given dataset
         :param self:
@@ -387,12 +405,15 @@ class Compute_Similarity:
         processedItems = 0
 
         if self.adjusted_cosine:
+            ic(self.adjusted_cosine)
             self.applyAdjustedCosine()
 
         elif self.pearson_correlation:
+            ic(self.pearson_correlation)
             self.applyPearsonCorrelation()
 
         elif self.tanimoto_coefficient or self.dice_coefficient or self.tversky_coefficient:
+            ic(self.tanimoto_coefficient)
             self.useOnlyBooleanInteractions()
 
         # We explore the matrix column-wise
@@ -403,9 +424,12 @@ class Compute_Similarity:
 
         # Tanimoto does not require the square root to be applied
         if not (self.tanimoto_coefficient or self.dice_coefficient or self.tversky_coefficient):
+            ic("NOT self.tanimoto_coefficient or self.dice_coefficient or self.tversky_coefficient")
             sumOfSquared = np.sqrt(sumOfSquared)
 
         if self.asymmetric_cosine:
+            ic("self.asymmetric_cosine")
+
             sumOfSquared_to_1_minus_alpha = np.power(sumOfSquared, 2 * (1 - self.asymmetric_alpha))
             sumOfSquared_to_alpha = np.power(sumOfSquared, 2 * self.asymmetric_alpha)
 
@@ -415,9 +439,12 @@ class Compute_Similarity:
         end_col_local = self.n_columns
 
         if start_col is not None and start_col > 0 and start_col < self.n_columns:
+            ic("start_col is not None and start_col > 0 and start_col < self.n_columns")
+            
             start_col_local = start_col
 
         if end_col is not None and end_col > start_col_local and end_col < self.n_columns:
+            ic("end_col is not None and end_col > start_col_local and end_col < self.n_columns")
             end_col_local = end_col
 
         start_col_block = start_col_local

@@ -20,6 +20,8 @@ ic.configureOutput(includeContext=True)
 
 #from elliot.recommender.base_recommender_model import BaseRecommenderModel
 from elliot.recommender.knn.user_knn.user_knn_similarity import Similarity
+from elliot.recommender.knn.user_knn.aiolli_ferrari import AiolliSimilarity
+
 from elliot.recommender.base_recommender_model import init_charger
 
 from elliot.recommender.knn.user_knn import UserKNN
@@ -66,10 +68,6 @@ class RecUserKNN(UserKNN):
             ("_row_weights", "row_weights", "rweights", None, None, lambda x: x if x else "")
         ]
         self.autoset_params()
-
-        self._ratings = self._data.train_dict
-        if self._implementation != "standard":
-            print("Options normalize, asymmetric_alpha, tversky_alpha, tversky_beta, row_weights are ignored with standard implementation. Try with implementation: standard")
 
         #self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
 
@@ -122,7 +120,9 @@ class RecUserKNN(UserKNN):
             ic("before Similarity")
             #model_instance = UserKNN(data = self._data, config = self._config, params=self._params)
             #model_instance = UserKNN(data = self._data, config = self._config, params=self._params)
-            self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
+            self._ratings = self._data.train_dict
+            self.set_model()
+            #self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
 
             ic("before model_instance.ititiaize()")
             #model = self.model_class(data=data_obj, config=self.base, params=model_params)
@@ -135,9 +135,12 @@ class RecUserKNN(UserKNN):
             ic("Success for this roundS")
             
             del self._model
+            del self._ratings
+          
             
-        
-        self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
+        self._ratings = self._data.train_dict
+        self.set_model()
+        #self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
         
         start = time.time()
         self._model.initialize()

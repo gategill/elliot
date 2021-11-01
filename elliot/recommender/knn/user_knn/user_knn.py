@@ -77,6 +77,12 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         self.autoset_params()
 
         self._ratings = self._data.train_dict
+        self.set_model()
+
+        #ic(self._data.train_dict[75])
+        
+    def set_model(self):
+        ic()
         if self._implementation == "aiolli":
             self._model = AiolliSimilarity(data=self._data,
                                            maxk=self._num_neighbors,
@@ -92,8 +98,6 @@ class UserKNN(RecMixin, BaseRecommenderModel):
             if (not self._normalize) or (self._asymmetric_alpha) or (self._tversky_alpha) or (self._tversky_beta) or (self._row_weights) or (self._shrink):
                 print("Options normalize, asymmetric_alpha, tversky_alpha, tversky_beta, row_weights are ignored with standard implementation. Try with implementation: aiolli")
             self._model = Similarity(data=self._data, num_neighbors=self._num_neighbors, similarity=self._similarity, implicit=self._implicit)
-
-        #ic(self._data.train_dict[75])
         
     def get_single_recommendation(self, mask, k, *args):
         ic()
