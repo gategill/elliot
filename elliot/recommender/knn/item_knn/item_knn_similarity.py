@@ -170,7 +170,25 @@ class Similarity(object):
         partially_ordered_preds_indices = np.argpartition(values, -local_k)[-local_k:]
         real_values = values[partially_ordered_preds_indices]
         real_indices = indices[partially_ordered_preds_indices]
-        local_top_k = real_values.argsort()[::-1]
+        local_top_k = real_values.argsort()[::-1]  
+        
+        excessive_values = [value for value in values if value > 100]
+            
+        with open("data/movielens_2k/recs_from_normal_similarity_item.txt", "w") as f:
+            #for u, recs in user_recs.items():
+            f.writelines(str(user_recs))
+            f.writelines("\n\n")
+            
+            f.writelines(str(indices))
+            f.writelines("\n\n")
+
+            f.writelines(str(values))
+            f.writelines("\n\n")
+
+            f.writelines(str(excessive_values))
+        
+        
+        
         return [(real_indices[item], real_values[item]) for item in local_top_k]
 
     # @staticmethod

@@ -129,6 +129,8 @@ class Evaluator(object):
             return None, None
         else:
             recommendations = {u: recs for u, recs in recommendations.items() if test_data.get(u, [])}
+            #ic(recommendations)
+            ic(self._metrics)
             rounding_factor = 5
             eval_start_time = time()
 

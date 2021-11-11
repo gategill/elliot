@@ -11,6 +11,10 @@ import pickle
 import time
 import pandas as pd
 
+import matplotlib
+import matplotlib.pyplot as plt
+
+
 from icecream import ic
 ic.configureOutput(includeContext=True)
 import copy
@@ -102,6 +106,7 @@ class UserKNN(RecMixin, BaseRecommenderModel):
     def get_single_recommendation(self, mask, k, *args):
         ic()
         ic("calling get_user_recs() k times: ".format(k))
+        ic(k)
         user_recs = {u: self._model.get_user_recs(u, mask, k) for u in self._ratings.keys()}
         
         with open("data/movielens_2k/get_user_recs.txt", "w") as f:
@@ -122,7 +127,10 @@ class UserKNN(RecMixin, BaseRecommenderModel):
             #         NEW_REC = pd.DataFrame({"userId" : [75], "itemId" : [1], "rating": [5]}) # deleted ,
 
         df = pd.DataFrame.from_records(from_records_list, columns = ["userId", "itemId", "rating"])
-        ic(df.head())
+        ic(df[df["rating"] > 5].sort_values(by = "rating", ascending=False).head(20))
+        
+        #df["rating"].plot.hist()
+        #plt.show()
         
         return df
         
@@ -150,10 +158,11 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         ic(predictions_top_k_val == predictions_top_k_test)
                 
         if df:
-            return self.get_user_recs_df(predictions_top_k_val)
+            user_recs_df = self.get_user_recs_df(predictions_top_k_val)
+            return user_recs_df
             #self.get_user_recs_df(predictions_top_k_test)
-        else:
-            return predictions_top_k_val, predictions_top_k_test
+        
+        return predictions_top_k_val, predictions_top_k_test
 
     @property
     def name(self):

@@ -13,6 +13,11 @@ import time
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from elliot.utils.write import store_recommendation
 
+import pandas as pd
+
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
 from elliot.recommender.base_recommender_model import BaseRecommenderModel
 from elliot.recommender.knn.item_knn.item_knn_similarity import Similarity
 from elliot.recommender.knn.item_knn.aiolli_ferrari import AiolliSimilarity
@@ -78,8 +83,24 @@ class ItemKNN(RecMixin, BaseRecommenderModel):
 
     def get_single_recommendation(self, mask, k, *args):
         return {u: self._model.get_user_recs(u, mask, k) for u in self._ratings.keys()}
+    
+    def get_user_recs_df(self, recs):
+        ic()
+        #from_records_list = []
+        from_records_list = [(u, rec[0], rec[1]) for u, rec_list in recs.items() for rec in rec_list]
 
-    def get_recommendations(self, k: int = 10):
+        #for u, rec_list in recs.items():
+        #    for rec in rec_list:
+        #        from_records_list.append((u, rec[0], rec[1]))
+            #         NEW_REC = pd.DataFrame({"userId" : [75], "itemId" : [1], "rating": [5]}) # deleted ,
+
+        df = pd.DataFrame.from_records(from_records_list, columns = ["userId", "itemId", "rating"])
+        ic(df[df["rating"] > 5].sort_values(by = "rating", ascending=False).head(20))
+        
+        return df
+        
+
+    def get_recommendations(self, k: int = 10, df = True):
         predictions_top_k_val = {}
         predictions_top_k_test = {}
 
@@ -87,6 +108,10 @@ class ItemKNN(RecMixin, BaseRecommenderModel):
 
         predictions_top_k_val.update(recs_val)
         predictions_top_k_test.update(recs_test)
+        
+                   
+        if df:
+            user_recs_df = self.get_user_recs_df(predictions_top_k_val)
 
         return predictions_top_k_val, predictions_top_k_test
 

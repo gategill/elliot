@@ -144,8 +144,14 @@ class AiolliSimilarity(object):
         # user_items = self._ratings[u].keys()
         user_recs_mask = mask[user_id]
         user_recs[~user_recs_mask] = -np.inf
+        
+        #ic(user_recs)
+        
         indices, values = zip(*[(self._data.private_items.get(u_list[0]), u_list[1])
                               for u_list in enumerate(user_recs)])
+        
+        #ic(indices)
+        #ic(values)
 
         # indices, values = zip(*predictions.items())
         indices = np.array(indices)
@@ -155,6 +161,25 @@ class AiolliSimilarity(object):
         real_values = values[partially_ordered_preds_indices]
         real_indices = indices[partially_ordered_preds_indices]
         local_top_k = real_values.argsort()[::-1]
+        
+        excessive_values = [value for value in values if value > 100]
+            
+        with open("data/movielens_2k/recs_from_aiolli.txt", "w") as f:
+            #for u, recs in user_recs.items():
+            f.writelines(str(user_recs))
+            f.writelines("\n\n")
+            
+            f.writelines(str(indices))
+            f.writelines("\n\n")
+
+            f.writelines(str(values))
+            f.writelines("\n\n")
+
+            f.writelines(str(excessive_values))
+            #f.writelines(str(u) + " : " + str(recs) + "\n\n")
+            #f.writelines(str(u) + " : " + str(recs) + "\n\n")
+                
+                
         return [(real_indices[item], real_values[item]) for item in local_top_k]
 
     # def get_user_recs(self, user, k=100):

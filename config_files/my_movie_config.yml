@@ -5,9 +5,9 @@ experiment:
     strategy: dataset
     dataset_path: ../data/movielens_2k/dataset.tsv 
 
-  prefiltering:
-    strategy : [user_k_core, item_k_core]
-    core : [30,20]
+  #prefiltering:
+  #  strategy : user_k_core
+  #  core : 30
 
 
   splitting:
@@ -34,14 +34,15 @@ experiment:
     #    save_recs: True
 
     external.RecUserKNN:
-    #UserKNN:
+    #ItemKNN:
       meta:
         verbose: True
         save_recs: True
         validation_metric: nDCG@10
-      neighbors: [50] #, 70, 100]
-      similarity: pearson
-      implementation: aiolli
+      #extra_params: true
+      neighbors: [50]
+      similarity: cosine
+      implementation: standard
 
     #Random:
     #  meta:

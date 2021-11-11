@@ -40,8 +40,13 @@ class ModelCoordinator(object):
         # data for THE model
         self.data_objs = data_objs # is this the list
         self.base = base
+        ic(self.base)
+        
         self.params = params
+        ic(self.params)
         self.model_class = model_class
+        ic(self.model_class)
+        
         self.test_fold_index = test_fold_index
         self.model_config_index = 0
 
@@ -54,7 +59,10 @@ class ModelCoordinator(object):
         and params, and results being required by the framework
         """
         sampled_namespace = SimpleNamespace(**args)
+        ic(sampled_namespace)
+        
         model_params = SimpleNamespace(**self.params[0].__dict__)
+        ic(model_params)
 
         self.logger.info("Hyperparameter tuning exploration:")
         for (k, v) in sampled_namespace.__dict__.items():
