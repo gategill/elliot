@@ -377,21 +377,25 @@ class DataSet(AbstractDataset):
         
     def dataframe_to_dict(self, data):
         ic()
-        users = list(data['userId'].unique())
+        ratings = {k: f.groupby('itemId')['rating'].apply(float).to_dict() for k, f in data.groupby('userId')}
+
+        """users = list(data['userId'].unique())
 
         "Conversion to Dictionary"
         ratings = {}
         for u in users:
             sel_ = data[data['userId'] == u]
-            ratings[u] = dict(zip(sel_['itemId'], sel_['rating']))
+            ratings[u] = dict(zip(sel_['itemId'], sel_['rating']))"""
         return ratings
 
     def build_dict(self, dataframe, users):
         ic()
-        ratings = {}
+        ratings = {k: f.groupby('itemId')['rating'].apply(float).to_dict() for k, f in dataframe.groupby('userId') if k in users}
+
+        """ratings = {}
         for u in users:
             sel_ = dataframe[dataframe['userId'] == u]
-            ratings[u] = dict(zip(sel_['itemId'], sel_['rating']))
+            ratings[u] = dict(zip(sel_['itemId'], sel_['rating']))"""
         return ratings
 
     def build_sparse(self):

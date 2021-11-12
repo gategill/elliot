@@ -90,7 +90,7 @@ def run_experiment(config_path: str = ''):
                 model_class = getattr(importlib.import_module("elliot.recommender"), key)
                 
                 
-            ic(base.base_namespace)
+            #ic(base.base_namespace)
             ic(model_base)
             ic(model_class)
             ic(test_fold_index)

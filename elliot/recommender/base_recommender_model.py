@@ -50,10 +50,10 @@ class BaseRecommenderModel(ABC):
         self._data = copy.deepcopy(data)
 
         self._config = config
-        ic(self._config)
+        #ic(self._config)
         
         self._params = params
-        ic(self._params)
+        #ic(self._params)
 
         self._negative_sampling = hasattr(data.config, "negative_sampling")
 
@@ -128,9 +128,11 @@ class BaseRecommenderModel(ABC):
         """
         self.logger.info("Loading parameters")
         for variable_name, public_name, shortcut, default, reading_function, _ in self._params_list:
-            #ic(variable_name)
-            #ic(public_name)
-            #ic(reading_function)
+            ic(variable_name)
+            ic(public_name)
+            ic(shortcut)
+            ic(default)
+            ic(reading_function)
             
             if reading_function is None:
                 setattr(self, variable_name, getattr(self._params, public_name, default))
@@ -172,11 +174,13 @@ def init_charger(init):
     #ic()
     @wraps(init)
     def new_init(self, *args, **kwargs):
-        #ic()
+        ic()
 
         BaseRecommenderModel.__init__(self, *args, **kwargs)
         package_name = inspect.getmodule(self).__package__
         rec_name = f"external.{self.__class__.__name__}" if "external" in package_name else self.__class__.__name__
+        ic(rec_name)
+        #logging.get_logger(rec_name)
         self.logger = logging.get_logger_model(rec_name, pylog.CRITICAL if self._config.config_test else pylog.DEBUG)
         np.random.seed(self._seed)
         random.seed(self._seed)

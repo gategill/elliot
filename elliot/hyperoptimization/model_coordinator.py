@@ -40,12 +40,12 @@ class ModelCoordinator(object):
         # data for THE model
         self.data_objs = data_objs # is this the list
         self.base = base
-        ic(self.base)
+        #ic(self.base)
         
         self.params = params
-        ic(self.params)
+        #ic(self.params)
         self.model_class = model_class
-        ic(self.model_class)
+        #ic(self.model_class)
         
         self.test_fold_index = test_fold_index
         self.model_config_index = 0

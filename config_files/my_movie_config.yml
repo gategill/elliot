@@ -16,7 +16,7 @@ experiment:
         test_ratio: 0.2
         folds : 1
 
-  top_k: 50
+  top_k: 25
 
   evaluation:
     cutoffs: [10] #, 9, 8, 7, 6, 5, 4, 3]
@@ -45,7 +45,7 @@ experiment:
 
       submodels:
         UserKNN:
-          neighbors: [9]
+          neighbors: 15
           similarity: cosine
           implementation: standard
 

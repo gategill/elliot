@@ -177,7 +177,12 @@ class RecGeneric(RecMixin, BaseRecommenderModel):
             sub_key, sub_model_base = "UserKNN", self._params.submodels["UserKNN"]
             
             model_class = getattr(importlib.import_module("elliot.recommender"), sub_key)
+            
             ns = SimpleNamespace(**sub_model_base)
+            #meta_model = self.config[_experiment][_models][key].get(_meta, {})
+            if not hasattr(ns, "meta"):
+                setattr(ns, "meta", SimpleNamespace())
+
             ic("SHOW ME THE NAMESPACE")
             ic(ns)
             

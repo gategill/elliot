@@ -11,6 +11,8 @@ import pickle
 import time
 import pandas as pd
 
+
+import os
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -77,15 +79,11 @@ class UserKNN(RecMixin, BaseRecommenderModel):
             ("_asymmetric_alpha", "asymmetric_alpha", "asymalpha", False, None, lambda x: x if x else ""),
             ("_tversky_alpha", "tversky_alpha", "tvalpha", False, None, lambda x: x if x else ""),
             ("_tversky_beta", "tversky_beta", "tvbeta", False, None, lambda x: x if x else ""),
-            ("_row_weights", "row_weights", "rweights", None, None, lambda x: x if x else ""),
-            ("_extra_params", "extra_params", "epms", False, None, None)
+            ("_row_weights", "row_weights", "rweights", None, None, lambda x: x if x else "")
         ]
         self.autoset_params()
         
         ic(self._params)
-        
-        ic(self._params.extra_params)
-
 
         self._ratings = self._data.train_dict
         self.set_model()
@@ -136,13 +134,10 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         df = pd.DataFrame.from_records(from_records_list, columns = ["userId", "itemId", "rating"])
         ic(df[df["rating"] > 5].sort_values(by = "rating", ascending=False).head(20))
         
-        #df["rating"].plot.hist()
-        #plt.show()
-        
         return df
         
 
-    def get_recommendations(self, k: int = 10, df = False):
+    def get_recommendations(self, k: int = 10, **kwargs): #df = True):
         # why two?
         ic()
         ic("k in get recommendations is:")
@@ -156,22 +151,70 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         predictions_top_k_test.update(recs_test)
         
           
-        with open("data/movielens_2k/predictions_top_k_val.txt", "w") as f:
-            for u, recs in predictions_top_k_val.items():
-                f.writelines(str(u) + " : " + str(recs) + "\n\n")
+        #with open("data/movielens_2k/predictions_top_k_val.txt", "w") as f:
+        #    for u, recs in predictions_top_k_val.items():
+        #        f.writelines(str(u) + " : " + str(recs) + "\n\n")
                 
-        with open("data/movielens_2k/predictions_top_k_test.txt", "w") as f:
-            for u, recs in predictions_top_k_test.items():
-                f.writelines(str(u) + " : " + str(recs) + "\n\n")
+        #with open("data/movielens_2k/predictions_top_k_test.txt", "w") as f:
+        #    for u, recs in predictions_top_k_test.items():
+        #        f.writelines(str(u) + " : " + str(recs) + "\n\n")
                 
-        ic(predictions_top_k_val == predictions_top_k_test)
+        #ic(predictions_top_k_val == predictions_top_k_test)
+        if ("plot" in kwargs) and (kwargs["plot"]):
+            user_recs_df = self.get_user_recs_df(predictions_top_k_val)
+            user_recs_df["rating"].plot.hist(bins = 50)
+            plt.show()
                 
-        if df:
+        if ("df" in kwargs) and (kwargs["df"]):
             user_recs_df = self.get_user_recs_df(predictions_top_k_val)
             return user_recs_df
             #self.get_user_recs_df(predictions_top_k_test)
         
         return predictions_top_k_val, predictions_top_k_test
+
+    def evaluate(self, it=None, loss=0, **kwargs):
+        r"""
+        what do I do?
+        get recommendations and evaluate!!!
+        """
+        
+        ic()
+        if (it is None) or (not (it + 1) % self._validation_rate):
+            
+            recs = self.get_recommendations(self.evaluator.get_needed_recommendations(), **kwargs)
+            result_dict = self.evaluator.eval(recs)
+            
+            #ic(result_dict)
+
+            self._losses.append(loss)
+
+            self._results.append(result_dict)
+
+            if it is not None:
+                self.logger.info(f'Epoch {(it + 1)}/{self._epochs} loss {loss/(it + 1):.5f}')
+            else:
+                self.logger.info(f'Finished')
+
+            if self._save_recs:
+                self.logger.info(f"Writing recommendations at: {self._config.path_output_rec_result}")
+                if it is not None:
+                    store_recommendation(recs[1], os.path.abspath(
+                        os.sep.join([self._config.path_output_rec_result, f"{self.name}_it={it + 1}.tsv"])))
+                else:
+                    store_recommendation(recs[1], os.path.abspath(
+                        os.sep.join([self._config.path_output_rec_result, f"{self.name}.tsv"])))
+
+            if (len(self._results) - 1) == self.get_best_arg():
+                if it is not None:
+                    self._params.best_iteration = it + 1
+                self.logger.info("******************************************")
+                self.best_metric_value = self._results[-1][self._validation_k]["val_results"][self._validation_metric]
+                if self._save_weights:
+                    if hasattr(self, "_model"):
+                        self._model.save_weights(self._saving_filepath)
+                    else:
+                        self.logger.warning("Saving weights FAILED. No model to save.")
+
 
     @property
     def name(self):
@@ -189,6 +232,7 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         print(f"The similarity computation has taken: {end - start}")
 
         print(f"Transactions: {self._data.transactions}")
-
-        self.evaluate()
+        
+        prs = {"df" : False, "plot" : True}
+        self.evaluate(**prs)
 

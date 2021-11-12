@@ -9,15 +9,19 @@ import re
 
 from elliot.utils.folder import build_log_folder
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
 
 class TimeFilter(logging.Filter):
 
     def filter(self, record: logging.LogRecord) -> bool:
+        ic()
         record.time_filter = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         return True
 
 
 def init(path_config, folder_log, log_level=logging.WARNING):
+    ic()
     # Pull in Logging Config
     path = os.path.join(path_config)
     build_log_folder(folder_log)
@@ -27,6 +31,7 @@ def init(path_config, folder_log, log_level=logging.WARNING):
     loader.add_implicit_resolver('!CUSTOM', pattern, None)
 
     def constructor_env_variables(loader, node):
+        ic()
         """
         Extracts the environment variable from the node's value
         :param yaml.Loader loader: the yaml loader
@@ -66,6 +71,7 @@ def init(path_config, folder_log, log_level=logging.WARNING):
 
 
 def get_logger(name, log_level=logging.DEBUG):
+    ic()
     if name not in logging.root.manager.loggerDict:
         logger = logging.getLogger(name)
     else:
@@ -75,7 +81,11 @@ def get_logger(name, log_level=logging.DEBUG):
 
 
 def get_logger_model(name, log_level=logging.DEBUG):
-    logger = logging.root.manager.loggerDict[name]
+    ic("inside logger model")
+    ic(name)
+    #ic(logging.root.manager.loggerDict)
+    # stoup me
+    logger = logging.root.manager.loggerDict[name] # external.RecGeneric
     logger_es = logging.root.manager.loggerDict["EarlyStopping"]
     logger_es.addFilter(TimeFilter())
     logger_es.addHandler(logger.handlers[0])
@@ -85,6 +95,7 @@ def get_logger_model(name, log_level=logging.DEBUG):
 
 
 def prepare_logger(name, path, log_level=logging.DEBUG):
+    ic()
     logger = logging.getLogger(name)
     logger.addFilter(TimeFilter())
     logger.setLevel(log_level)
