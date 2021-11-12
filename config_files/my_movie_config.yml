@@ -35,9 +35,9 @@ experiment:
 
     #external.RecUserKNN:
     UserKNN:
-      meta:
+      #meta:
         #verbose: True
-        save_recs: True
+        #save_recs: True
         #validation_metric: nDCG@10
       #extra_params: true
       neighbors: [20]

@@ -53,7 +53,8 @@ class BaseRecommenderModel(ABC):
         self._params = params
 
         self._negative_sampling = hasattr(data.config, "negative_sampling")
-
+        ic("this is the params in tnehn")
+        ic(self._params)
         self._restore = getattr(self._params.meta, "restore", False)
 
         _cutoff_k = getattr(data.config.evaluation, "cutoffs", [data.config.top_k])
