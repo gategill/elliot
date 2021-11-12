@@ -16,7 +16,7 @@ experiment:
         test_ratio: 0.2
         folds : 1
 
-  top_k: 50
+  top_k: 25
 
   evaluation:
     cutoffs: [10] #, 9, 8, 7, 6, 5, 4, 3]
@@ -33,14 +33,14 @@ experiment:
     #    verbose: True
     #    save_recs: True
 
-    external.RecUserKNN:
-    #ItemKNN:
+    #external.RecUserKNN:
+    UserKNN:
       meta:
-        verbose: True
+        #verbose: True
         save_recs: True
-        validation_metric: nDCG@10
+        #validation_metric: nDCG@10
       #extra_params: true
-      neighbors: [50]
+      neighbors: [20]
       similarity: cosine
       implementation: standard
 
