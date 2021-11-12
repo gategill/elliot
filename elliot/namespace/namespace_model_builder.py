@@ -11,8 +11,11 @@ from abc import ABC, abstractmethod, abstractproperty
 
 from elliot.namespace.namespace_model import NameSpaceModel
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
 
 class Builder(ABC):
+    ic()
     """
     The Builder interface specifies methods for creating the different parts of
     the Product objects.
@@ -30,6 +33,7 @@ class Builder(ABC):
 class NameSpaceBuilder(Builder):
 
     def __init__(self, config_path, base_folder_path_elliot, base_folder_path_config) -> None:
+        ic()
         """
         A fresh builder instance should contain a blank product object, which is
         used in further assembly.
@@ -38,9 +42,11 @@ class NameSpaceBuilder(Builder):
 
     @property
     def base(self) -> NameSpaceModel:
+        ic()
         namespace = self._namespace
         namespace.fill_base()
         return namespace
 
     def models(self) -> tuple:
+        ic()
         return self._namespace.fill_model()

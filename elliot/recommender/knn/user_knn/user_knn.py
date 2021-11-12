@@ -67,6 +67,7 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         ic()
 
         self._params_list = [
+            # variable_name, public_name, shortcut, default, reading_function, _ 
             ("_num_neighbors", "neighbors", "nn", 40, int, None),
             ("_similarity", "similarity", "sim", "cosine", None, None),
             ("_implementation", "implementation", "imp", "standard", None, None),
@@ -76,13 +77,19 @@ class UserKNN(RecMixin, BaseRecommenderModel):
             ("_asymmetric_alpha", "asymmetric_alpha", "asymalpha", False, None, lambda x: x if x else ""),
             ("_tversky_alpha", "tversky_alpha", "tvalpha", False, None, lambda x: x if x else ""),
             ("_tversky_beta", "tversky_beta", "tvbeta", False, None, lambda x: x if x else ""),
-            ("_row_weights", "row_weights", "rweights", None, None, lambda x: x if x else "")
+            ("_row_weights", "row_weights", "rweights", None, None, lambda x: x if x else ""),
+            ("_extra_params", "extra_params", "epms", False, None, None)
         ]
         self.autoset_params()
+        
+        ic(self._params)
+        
+        ic(self._params.extra_params)
+
 
         self._ratings = self._data.train_dict
         self.set_model()
-
+        
         #ic(self._data.train_dict[75])
         
     def set_model(self):
@@ -138,6 +145,8 @@ class UserKNN(RecMixin, BaseRecommenderModel):
     def get_recommendations(self, k: int = 10, df = False):
         # why two?
         ic()
+        ic("k in get recommendations is:")
+        ic(k)
         predictions_top_k_val = {}
         predictions_top_k_test = {}
 
@@ -170,6 +179,7 @@ class UserKNN(RecMixin, BaseRecommenderModel):
 
     def train(self):
         ic()
+
         if self._restore:
             return self.restore_weights()
 

@@ -33,16 +33,21 @@ experiment:
     #    verbose: True
     #    save_recs: True
 
-    external.RecUserKNN:
-    #ItemKNN:
+    #external.RecUserKNN:
+    external.RecGeneric:
+    #UserKNN:
       meta:
         verbose: True
         save_recs: True
         validation_metric: nDCG@10
-      #extra_params: true
-      neighbors: [50]
-      similarity: cosine
-      implementation: standard
+
+      enrichment_rounds: 3
+
+      submodels:
+        UserKNN:
+          neighbors: [9]
+          similarity: cosine
+          implementation: standard
 
     #Random:
     #  meta:

@@ -50,14 +50,19 @@ class BaseRecommenderModel(ABC):
         self._data = copy.deepcopy(data)
 
         self._config = config
+        ic(self._config)
+        
         self._params = params
+        ic(self._params)
 
         self._negative_sampling = hasattr(data.config, "negative_sampling")
 
+        ic(self._params)
         self._restore = getattr(self._params.meta, "restore", False)
 
         _cutoff_k = getattr(data.config.evaluation, "cutoffs", [data.config.top_k])
         _cutoff_k = _cutoff_k if isinstance(_cutoff_k, list) else [_cutoff_k]
+        
         _first_metric = data.config.evaluation.simple_metrics[0] if data.config.evaluation.simple_metrics else ""
         _default_validation_k = _cutoff_k[0]
         self._validation_metric = getattr(self._params.meta, "validation_metric",
@@ -104,7 +109,9 @@ class BaseRecommenderModel(ABC):
 
     def get_params_shortcut(self):
         ic()
-        return "_".join([str(p[2])+"="+ str(p[5](getattr(self, p[0])) if p[5] else getattr(self, p[0])).replace(".", "$") for p in self._params_list])
+        params_shortcut = "_".join([str(p[2])+"="+ str(p[5](getattr(self, p[0])) if p[5] else getattr(self, p[0])).replace(".", "$") for p in self._params_list])
+        ic(params_shortcut)
+        return params_shortcut
 
     def autoset_params(self):
         ic()
@@ -121,6 +128,10 @@ class BaseRecommenderModel(ABC):
         """
         self.logger.info("Loading parameters")
         for variable_name, public_name, shortcut, default, reading_function, _ in self._params_list:
+            #ic(variable_name)
+            #ic(public_name)
+            #ic(reading_function)
+            
             if reading_function is None:
                 setattr(self, variable_name, getattr(self._params, public_name, default))
             else:
@@ -171,6 +182,7 @@ def init_charger(init):
         random.seed(self._seed)
         self._nprandom = np.random
         self._random = random
+        
         self._num_items = self._data.num_items
         self._num_users = self._data.num_users
 

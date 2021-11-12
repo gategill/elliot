@@ -23,6 +23,9 @@ from yaml import load
 import elliot.hyperoptimization as ho
 from elliot.utils.folder import manage_directories
 
+from icecream import ic
+ic.configureOutput(includeContext=True)
+
 regexp = re.compile(r'[\D][\w-]+\.[\w-]+')
 
 _experiment = 'experiment'
@@ -59,10 +62,12 @@ _data_paths = 'data_paths'
 _meta = 'meta'
 _random_seed = 'random_seed'
 _align_side_with_train = "align_side_with_train"
+_submodels = "submodels"
 
 
 class NameSpaceModel:
     def __init__(self, config_path, base_folder_path_elliot, base_folder_path_config):
+        ic()
         self.base_namespace = SimpleNamespace()
 
         self._base_folder_path_elliot = base_folder_path_elliot
@@ -75,6 +80,7 @@ class NameSpaceModel:
 
     @staticmethod
     def _set_path(config_path, local_path):
+        ic()
         if os.path.isabs(local_path):
             return os.path.abspath(local_path)
         else:
@@ -87,6 +93,7 @@ class NameSpaceModel:
 
     @staticmethod
     def _safe_set_path(config_path, raw_local_path, dataset_name):
+        ic()
         if isinstance(raw_local_path, str):
             local_path = raw_local_path.format(dataset_name)
             if os.path.isabs(local_path):
@@ -101,7 +108,7 @@ class NameSpaceModel:
             return raw_local_path
 
     def fill_base(self):
-
+        ic()
         # for path in self.config[_experiment][_data_paths].keys():
         #     self.config[_experiment][_data_paths][path] = \
         #         self.config[_experiment][_data_paths][path].format(self.config[_experiment][_dataset])
@@ -210,6 +217,7 @@ class NameSpaceModel:
                 self.config[_experiment][p]["paired_ttest"] = paired_ttest
                 self.config[_experiment][p]["wilcoxon_test"] = wilcoxon_test
                 setattr(self.base_namespace, p, SimpleNamespace(**self.config[_experiment][p]))
+                
             elif p == _logger_config:
                 if not self.config[_experiment].get(p, False):
                     setattr(self.base_namespace, p, os.path.abspath(os.sep.join([self._base_folder_path_elliot, "config", "logger_config.yml"])))
@@ -241,6 +249,7 @@ class NameSpaceModel:
                     setattr(self.base_namespace, p, self.config[_experiment][p])
 
     def fill_model(self):
+        ic()
         for key in self.config[_experiment][_models]:
             meta_model = self.config[_experiment][_models][key].get(_meta, {})
             model_name_space = SimpleNamespace(**self.config[_experiment][_models][key])

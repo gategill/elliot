@@ -88,7 +88,12 @@ def run_experiment(config_path: str = ''):
                 model_class = getattr(importlib.import_module("external"), key.split(".", 1)[1])
             else:
                 model_class = getattr(importlib.import_module("elliot.recommender"), key)
+                
+                
+            ic(base.base_namespace)
+            ic(model_base)
             ic(model_class)
+            ic(test_fold_index)
             
             model_placeholder = ho.ModelCoordinator(data_test, base.base_namespace, model_base, model_class,
                                                     test_fold_index)
@@ -211,6 +216,14 @@ def config_test(builder, base):
 
                 model_base_mock = model_base
                 model_base_mock = _reset_verbose_option(model_base_mock)
+                
+                ic("important")
+                #ic(data_test)
+                ic(base.base_namespace)
+                ic(model_base_mock)
+                ic(model_class)
+  
+                
                 model_placeholder = ho.ModelCoordinator(data_test, base.base_namespace, model_base_mock, model_class)
                 if isinstance(model_base, tuple):
                     trials = Trials()
