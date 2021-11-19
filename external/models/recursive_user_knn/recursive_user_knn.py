@@ -113,7 +113,7 @@ class RecUserKNN(UserKNN):
         #    return self.restore_weights()
         
         # enrichment phase
-        ENRICHMENTS = 0
+        ENRICHMENTS = 2
         for i in range(ENRICHMENTS):
             ic(i)
             ic(self._data.transactions)

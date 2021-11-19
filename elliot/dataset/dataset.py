@@ -274,37 +274,52 @@ class DataSet(AbstractDataset):
 
         self.allunrated_mask = np.where((self.sp_i_train.toarray() == 0), True, False)
         
-        with open("data/movielens_2k/data_tuple_0.txt", "w") as f:
-            f.write(str(self._data_tuple[0]) + "\n\n")
-            f.write(str(type(self._data_tuple[0])) + "\n\n")
-            
-            f.write(str(self.users) + "\n\n")
-            f.write(str(self.items) + "\n\n")
-            
-            f.write(str(self.num_users) + "\n\n")
-            f.write(str(self.num_items) + "\n\n")
-            
-            f.write(str(self.transactions) + "\n\n")
-            
-            f.write(str(self.private_users) + "\n\n")
-            f.write(str(self.public_users) + "\n\n")
-            f.write(str(self.private_items) + "\n\n")
-            f.write(str(self.public_items) + "\n\n")
-            f.write(str(self.allunrated_mask) + "\n\n")
-            
-            f.write(str(self.i_train_dict) + "\n\n")
-            f.write(str(self.sp_i_train) + "\n\n")
-            f.write(str(self.sp_i_train_ratings) + "\n\n")
+        #with open("data/movielens_2k/data_tuple_0.txt", "w") as f:
+        #    f.write(str(self._data_tuple[0]) + "\n\n")
+        #    f.write(str(type(self._data_tuple[0])) + "\n\n")
+        #    
+        #    f.write(str(self.users) + "\n\n")
+        #    f.write(str(self.items) + "\n\n")
+        #    
+        #    f.write(str(self.num_users) + "\n\n")
+        #    f.write(str(self.num_items) + "\n\n")
+        #    
+        #    f.write(str(self.transactions) + "\n\n")
+        #    
+        #    f.write(str(self.private_users) + "\n\n")
+        #    f.write(str(self.public_users) + "\n\n")
+        #    f.write(str(self.private_items) + "\n\n")
+        #    f.write(str(self.public_items) + "\n\n")
+        #    f.write(str(self.allunrated_mask) + "\n\n")
+        #    
+        #    f.write(str(self.i_train_dict) + "\n\n")
+        #    f.write(str(self.sp_i_train) + "\n\n")
+        #    f.write(str(self.sp_i_train_ratings) + "\n\n")
             
         #self.add_new_recs_to_train_set()
+    #def get_ratings(self, new_recs_df_rating):
+        #range_of_ratings = new_recs_df_rating.rating.max() - new_recs_df_rating.rating.min()
+        
+        
+        #return 5 - (100*())
+        
+        
+        
 
-    def add_new_recs_to_train_set(self, new_recs_df = None):
+    def add_new_recs_to_train_set(self, new_recs_df = None, normalise = True):
         ic()
         if new_recs_df is None:
             new_recs_df = pd.DataFrame({"userId" : [75], "itemId" : [1], "rating": [5]})
             
+        if normalise:
+            range_of_ratings = new_recs_df.rating.max() - new_recs_df.rating.min()
+            new_recs_df["rating"] = new_recs_df.apply(lambda x : 5 - np.round(5*(x["rating"]/range_of_ratings), 3), axis = 1)
+            ic("normalised ratings")
+            ic(new_recs_df["rating"])
+                       
         new_train_df = self._data_tuple[0].append(new_recs_df, ignore_index = True)
         
+        # (train, test)
         self._data_tuple = (new_train_df, self._data_tuple[1])
         
         with open("data/movielens_2k/data_tuple_0_updated_df.txt", "w") as f:
@@ -352,28 +367,28 @@ class DataSet(AbstractDataset):
 
 
         
-        with open("data/movielens_2k/data_tuple_0_updated.txt", "w") as f:
-            #for u, recs in user_recs.items():
-            f.write(str(self._data_tuple[0]) + "\n\n") # differs
-            f.write(str(type(self._data_tuple[0])) + "\n\n")
-            
-            f.write(str(self.users) + "\n\n")
-            f.write(str(self.items) + "\n\n")
-            
-            f.write(str(self.num_users) + "\n\n")
-            f.write(str(self.num_items) + "\n\n")
-            
-            f.write(str(self.transactions) + "\n\n") # differs
-            
-            f.write(str(self.private_users) + "\n\n")
-            f.write(str(self.public_users) + "\n\n")
-            f.write(str(self.private_items) + "\n\n")
-            f.write(str(self.public_items) + "\n\n")
-            f.write(str(self.allunrated_mask) + "\n\n")
-            
-            f.write(str(self.i_train_dict) + "\n\n") # differs
-            f.write(str(self.sp_i_train) + "\n\n") # differs
-            f.write(str(self.sp_i_train_ratings) + "\n\n") # differs
+        #with open("data/movielens_2k/data_tuple_0_updated.txt", "w") as f:
+        #    #for u, recs in user_recs.items():
+        #    f.write(str(self._data_tuple[0]) + "\n\n") # differs
+        #    f.write(str(type(self._data_tuple[0])) + "\n\n")
+        #    
+        #    f.write(str(self.users) + "\n\n")
+        #    f.write(str(self.items) + "\n\n")
+        #    
+        #    f.write(str(self.num_users) + "\n\n")
+        #    f.write(str(self.num_items) + "\n\n")
+        #    
+        #    f.write(str(self.transactions) + "\n\n") # differs
+        #    
+        #    f.write(str(self.private_users) + "\n\n")
+        #    f.write(str(self.public_users) + "\n\n")
+        #    f.write(str(self.private_items) + "\n\n")
+        #    f.write(str(self.public_items) + "\n\n")
+        #    f.write(str(self.allunrated_mask) + "\n\n")
+        #    
+        #    f.write(str(self.i_train_dict) + "\n\n") # differs
+        #    f.write(str(self.sp_i_train) + "\n\n") # differs
+        #    f.write(str(self.sp_i_train_ratings) + "\n\n") # differs
         
     def dataframe_to_dict(self, data):
         ic()
