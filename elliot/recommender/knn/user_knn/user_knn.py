@@ -179,6 +179,9 @@ class UserKNN(RecMixin, BaseRecommenderModel):
         """
         
         ic()
+        ic(it)
+        ic(loss)
+        
         if (it is None) or (not (it + 1) % self._validation_rate):
             
             recs = self.get_recommendations(self.evaluator.get_needed_recommendations(), **kwargs)

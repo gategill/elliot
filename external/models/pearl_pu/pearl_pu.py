@@ -56,8 +56,8 @@ class PearlPu(RecMixin, BaseRecommenderModel):
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
         # copy it self._data = data
-        ic("DOING WEIRD COPY STUFF")
-        ic(self._data.transactions)
+        #ic("DOING WEIRD COPY STUFF")
+        #ic(self._data.transactions)
         
         #self._data = copy.deepcopy(data)
         #ic(self._data.transactions)
@@ -179,6 +179,7 @@ class PearlPu(RecMixin, BaseRecommenderModel):
         """
         
         ic()
+        ic(it) # iteration???
         if (it is None) or (not (it + 1) % self._validation_rate):
             
             recs = self.get_recommendations(self.evaluator.get_needed_recommendations(), **kwargs)
@@ -218,7 +219,7 @@ class PearlPu(RecMixin, BaseRecommenderModel):
 
     @property
     def name(self):
-        return f"UserKNN_{self.get_params_shortcut()}"
+        return f"PearlPu_{self.get_params_shortcut()}"
 
     def train(self):
         ic()

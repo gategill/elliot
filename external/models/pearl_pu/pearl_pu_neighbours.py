@@ -5,35 +5,30 @@ ic.configureOutput(includeContext=True)
 
 import numpy as np
 from scipy import sparse
-from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances, haversine_distances, chi2_kernel, manhattan_distances
-from sklearn.metrics import pairwise_distances
+#from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances, haversine_distances, chi2_kernel, manhattan_distances
+#from sklearn.metrics import pairwise_distances
 
 
-class Similarity(object):
+class SelectNeighbours(object):
     """
     Simple kNN class
     """
 
-    def __init__(self, data, num_neighbors, similarity, implicit):
+    def __init__(self, data, num_neighbors, strategy)
         ic()
+        # deep copy or not?
         self._data = data
         self._ratings = data.train_dict
         self._num_neighbors = num_neighbors
-        self._similarity = similarity
-        self._implicit = implicit
-
-        if self._implicit:
-            self._URM = self._data.sp_i_train
-        else:
-            self._URM = self._data.sp_i_train_ratings
+        self._strategy = strategy
         
         # is this our local deep copy?
-        self._users = self._data.users
-        self._items = self._data.items
-        self._private_users = self._data.private_users
-        self._public_users = self._data.public_users
-        self._private_items = self._data.private_items
-        self._public_items = self._data.public_items
+        #self._users = self._data.users
+        #self._items = self._data.items
+        #self._private_users = self._data.private_users
+        #self._public_users = self._data.public_users
+        #self._private_items = self._data.private_items
+        #self._public_items = self._data.public_items
 
     def initialize(self):
         ic()
@@ -41,10 +36,10 @@ class Similarity(object):
         This function initialize the data model
         """
 
-        self.supported_similarities = ["cosine", "dot", ]
-        self.supported_dissimilarities = ["euclidean", "manhattan", "haversine",  "chi2", 'cityblock', 'l1', 'l2', 'braycurtis', 'canberra', 'chebyshev', 'correlation', 'dice', 'hamming', 'jaccard', 'kulsinski', 'mahalanobis', 'minkowski', 'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule']
-        print(f"\nSupported Similarities: {self.supported_similarities}")
-        print(f"Supported Distances/Dissimilarities: {self.supported_dissimilarities}\n")
+        self.supported_strategies = ["BS", "BS+", "SS", "CS", "CS+"]
+        #self.supported_dissimilarities = ["euclidean", "manhattan", "haversine",  "chi2", 'cityblock', 'l1', 'l2', 'braycurtis', 'canberra', 'chebyshev', 'correlation', 'dice', 'hamming', 'jaccard', 'kulsinski', 'mahalanobis', 'minkowski', 'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule']
+        print(f"\nSupported Strategies: {self.supported_strategies}")
+        #print(f"Supported Distances/Dissimilarities: {self.supported_dissimilarities}\n")
 
         # self._user_ratings = self._ratings
         #
@@ -60,6 +55,7 @@ class Similarity(object):
         self.process_similarity(self._similarity)
 
         ##############
+        '''
         data, rows_indices, cols_indptr = [], [], []
 
         column_row_index = np.arange(len(self._users), dtype=np.int32)
@@ -81,16 +77,18 @@ class Similarity(object):
         W_sparse = sparse.csc_matrix((data, rows_indices, cols_indptr),
                                      shape=(len(self._users), len(self._users)), dtype=np.float32).tocsr()
         
-        ic(self._URM)
-        ic(W_sparse)
+        return W_sparse
+        #ic(self._URM)
+        #ic(W_sparse)
 
-        self._preds = W_sparse.dot(self._URM).toarray()
+        #self._preds = W_sparse.dot(self._URM).toarray()
         
-        ic(self._preds)
+        #ic(self._preds)
         ##############
         # self.compute_neighbors()
 
-        del self._similarity_matrix
+        #del self._similarity_matrix
+        '''
 
     # def compute_neighbors(self):
     #     self._neighbors = {}
@@ -103,7 +101,7 @@ class Similarity(object):
     # def get_user_neighbors(self, item):
     #     return self._neighbors.get(item, {})
 
-    def process_similarity(self, similarity):
+    def process_strategy(self, stratogy):
         ic()
         
         if similarity == "cosine":
@@ -127,6 +125,8 @@ class Similarity(object):
                              f"\nAllowed values are: {self.supported_similarities}, {self.supported_dissimilarities}."
                              f"\nPassed value was {similarity}\nTry with implementation: aiolli")
 
+
+    def select_neighbours(self, user_x, item):
     # def process_cosine(self):
     #     x, y = np.triu_indices(self._similarity_matrix.shape[0], k=1)
     #     self._similarity_matrix[x, y] = cosine_similarity(self._data.sp_i_train_ratings)[x, y]
@@ -148,7 +148,9 @@ class Similarity(object):
     # def get_transactions(self):
     #     return self._transactions
 
-    def get_user_recs(self, u, mask, k):
+    #
+    
+    '''def get_user_recs(self, u, mask, k):
         #ic()
         
         user_id = self._data.public_users.get(u)
@@ -184,6 +186,7 @@ class Similarity(object):
             f.writelines(str(excessive_values))
             
         return [(real_indices[item], real_values[item]) for item in local_top_k]
+    '''
     
 
         
@@ -212,7 +215,7 @@ class Similarity(object):
     #     num = sum([v for k, v in neighs.items() if k in user_neighs_items])
     #     den = sum(np.power(list(neighs.values()), 1))
     #     return num/den if den != 0 else 0
-    
+    '''
     def get_model_state(self):
         ic()
         saving_dict = {}
@@ -238,3 +241,4 @@ class Similarity(object):
         ic()
         with open(path, "wb") as f:
             pickle.dump(self.get_model_state(), f)
+        '''
