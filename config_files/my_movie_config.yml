@@ -5,9 +5,9 @@ experiment:
     strategy: dataset
     dataset_path: ../data/movielens_2k/dataset.tsv 
 
-  #prefiltering:
-  #  strategy : user_k_core
-  #  core : 30
+  prefiltering:
+    strategy : user_k_core
+    core : 20
 
 
   splitting:
@@ -55,9 +55,13 @@ experiment:
     #    save_recs: True
     #  seed: 42
 
-    UserKNN:
+    external.PearlPu:
       meta:
         save_recs: True
-      neighbors: 50
-      similarity: cosine
-      implementation: standard
+        
+      strategy: BS
+      big_k: 10
+      recursive_level: 2
+      combination_weight: 0.7
+
+      
